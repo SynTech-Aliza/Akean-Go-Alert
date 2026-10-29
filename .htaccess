@@ -1,0 +1,3 @@
+<FilesMatch "^(api_common\.php|connection\.php|registration_schema\.sql)$">
+    Require all denied
+</FilesMatch>

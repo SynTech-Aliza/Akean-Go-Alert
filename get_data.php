@@ -1,24 +1,19 @@
 <?php
-header("Content-Type: application/json; charset=UTF-8");
+declare(strict_types=1);
 
-// Your DirectAdmin Database Credentials
-$host = "localhost";
-$dbname = "your_database_name";
-$username = "your_database_user";
-$password = "your_database_password";
+require_once __DIR__ . '/api_common.php';
+
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' || ($_GET['health'] ?? '') !== '1') {
+    api_json(404, ['status' => 'error', 'message' => 'Not found.']);
+}
 
 try {
-    $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Change 'users' to your actual table name
-    $stmt = $conn->prepare("SELECT * FROM users");
-    $stmt->execute();
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    echo json_encode(["status" => "success", "data" => $data]);
-
-} catch (PDOException $e) {
-    echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    api_database();
+    api_json(200, ['status' => 'success']);
+} catch (Throwable $error) {
+    api_log_error($error);
+    api_json(503, [
+        'status' => 'error',
+        'message' => 'Database connection failed.',
+    ]);
 }
-?>
